@@ -1,0 +1,66 @@
+//Colorado is one of two US states that is in the shape of a rectangle. Colorado is located in a rectangle
+between 37 and 41 degrees north latitude and between 102 and 109 degrees west longitude. Implement a
+Circom circuit that would allow a Colorado resident to prove that he is a Colorado resident without revealing
+his exact residential address. The resident sends as a private inputs his north latitude (a number between 0
+and 90) and west longitude (a number between 0 and 180). The resident must also commit by hashing his
+residential address.
+
+pragma circom 2.1.6;
+
+include "circomlib/comparators.circom";
+include "circomlib/poseidon.circom";
+
+
+template Colorado() {
+
+    signal input nl;
+    signal input wl;
+    signal input salt;
+    signal input commitment;
+
+    signal output answer;
+
+    signal answer1;
+    signal answer2;
+
+    component hash = Poseidon(3);
+    hash.inputs[0] <== nl;
+    hash.inputs[1] <== wl;
+    hash.inputs[2] <== salt;
+    commitment === hash.out;
+
+    component provera11 = LessThan(90);
+    component provera12 = GreaterThan(90);
+
+    provera11.in[0] <== nl;
+    provera11.in[1] <== 41;
+    provera12.in[0] <== nl;
+    provera12.in[1] <== 37;
+    answer1 <== provera11.out * provera12.out;
+
+    component provera21 = LessThan(180);
+    component provera22 = GreaterThan(180);
+
+    provera21.in[0] <== wl;
+    provera21.in[1] <== 109;
+    provera22.in[0] <== wl;
+    provera22.in[1] <== 102;
+    answer2 <== provera21.out * provera22.out;
+
+    answer <== answer1 * answer2;
+
+
+}
+
+component main { public [commitment] } = Colorado();
+
+// component main = Multiplier3();
+
+/* INPUT = {
+
+ "nl" : "40",
+ "wl" : "105",
+ "salt" : "578789985645456879678",
+ "commitment": "16080859208490804802086449796638859372948838217054098018637226837237876378639"
+
+} */
