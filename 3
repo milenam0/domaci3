@@ -1,0 +1,62 @@
+// Milica has a secret code. Ana has a list of 10 different values. Milica needs to prove to Ana that the Poseidon
+hash of her secret code matches one of the values in Ana’s list, without revealing the secret code itself.
+Implement a Circom circuit that enables Milica to provide Ana with such a ZK proof.
+
+pragma circom 2.1.6;
+
+include "circomlib/comparators.circom";
+include "circomlib/poseidon.circom";
+include "circomlib/mux1.circom";
+
+
+template SecretCode(N) {
+    //nama je N=10 (nismo morali da korisitmo N jer je fiksirina vrednost)
+
+
+    signal input niz[N];
+    signal input tajniKod;
+
+    signal output odgovor;
+
+    signal hash;
+    component pom = Poseidon(1);
+    pom.inputs[0] <== tajniKod;
+    hash <== pom.out;
+
+    component jednaki[N];
+    component polje[N];
+    var pogodak = 0;
+
+    for(var i=0; i<N; i++) {
+        jednaki[i] = IsEqual();
+        jednaki[i].in[0] <== hash;
+        jednaki[i].in[1] <== niz[i];
+        //ako smo pronasli jednake vrednosti, jednaki.out ce biti 1, u suprotnom 0
+
+        polje[i] = Mux1();
+        polje[i].c[0] <== 0;
+        polje[i].c[1] <== niz[i];
+        polje[i].s <== jednaki[i].out; //ako su vrednosti bile jednake onda je selektorski bit 1, u suprotnom 0
+        
+
+        pogodak += polje[i].out;
+        
+
+    }
+
+    odgovor <== pogodak;
+
+
+    
+}
+
+component main { public [niz] } = SecretCode(10);
+
+
+
+/* INPUT = {
+
+ "tajniKod" : "123",
+ "niz" : [ "123", "234423", "332112", "9904028930859697121695025471312564917337032846528014134060777877259199866166", "6543", "1234", "23454323432", "43", "5", "123456"]
+
+} */
