@@ -1,0 +1,51 @@
+// Implement a Circom circuit that verifies that a public input value can be factored using 5 private input values.
+
+pragma circom 2.1.6;
+
+include "circomlib/comparators.circom";
+
+
+template Factor() {
+
+    signal input broj;
+    signal input br1;
+    signal input br2;
+    signal input br3;
+    signal input br4;
+    signal input br5;
+
+    signal output rez;
+
+    signal pom1;
+    signal pom2;
+    signal pom3;
+    signal pom4;
+
+    pom1 <== br1 * br2;
+    pom2 <== pom1 * br3;
+    pom3 <== pom2 * br4;
+    pom4 <== pom3 * br5;
+
+    component jednaki = IsEqual();
+    jednaki.in[0] <== pom4;
+    jednaki.in[1] <== broj;
+
+    rez <== jednaki.out;
+
+
+}
+
+component main { public [broj] } = Factor();
+
+// component main = Multiplier3();
+
+/* INPUT = {
+
+ "broj" : "127",
+ "br1" : "1",
+ "br2" : "2",
+ "br3" : "3",
+ "br4" : "4",
+ "br5" : "5"
+
+} */
