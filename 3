@@ -37,6 +37,9 @@ template SecretCode(N) {
         polje[i].c[0] <== 0;
         polje[i].c[1] <== niz[i];
         polje[i].s <== jednaki[i].out; //ako su vrednosti bile jednake onda je selektorski bit 1, u suprotnom 0
+
+
+        //da li ovo mora da se radi pomocu mux-a?
         
 
         pogodak += polje[i].out;
